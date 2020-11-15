@@ -7,13 +7,34 @@ trigger:
 - master
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'windows-2019'
+
+variables:
+  buildConfiguration: 'Release'
+  SolutionPath: 'BlazorAppDemoLive/Server/BlazorAppDemoLive.Server.csproj'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- task: DotNetCoreInstaller@0
+  displayName: "Instalando NetCore SDK"
+  inputs:
+    packageType: 'sdk'
+    version: '5.0.100'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- task: DotNetCoreCLI@2
+  displayName: 'prueba de compilar los proyectos usando el csproj'
+  inputs:
+    command: 'build'
+    projects: $(SolutionPath)
+    configuration: $(buildConfiguration)
+
+- task: DotNetCoreCLI@2
+  displayName: 'publicando'
+  inputs:
+    command: publish
+    publishWebProjects: false
+    projects: $(SolutionPath)
+    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    zipAfterPublish: false
+    modifyOutputPath: false
+- task: PublishBuildArtifacts@1
+  displayName: 'publicando'
