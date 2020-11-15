@@ -1,0 +1,40 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-2019'
+
+variables:
+  buildConfiguration: 'Release'
+  SolutionPath: 'BlazorAppDemoLive/Server/BlazorAppDemoLive.Server.csproj'
+
+steps:
+- task: DotNetCoreInstaller@0
+  displayName: "Instalando NetCore SDK"
+  inputs:
+    packageType: 'sdk'
+    version: '5.0.100'
+
+- task: DotNetCoreCLI@2
+  displayName: 'prueba de compilar los proyectos usando el csproj'
+  inputs:
+    command: 'build'
+    projects: $(SolutionPath)
+    configuration: $(buildConfiguration)
+
+- task: DotNetCoreCLI@2
+  displayName: 'publicando'
+  inputs:
+    command: publish
+    publishWebProjects: false
+    projects: $(SolutionPath)
+    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    zipAfterPublish: false
+    modifyOutputPath: false
+- task: PublishBuildArtifacts@1
+  displayName: 'publicando'
